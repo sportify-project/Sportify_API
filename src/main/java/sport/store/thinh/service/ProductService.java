@@ -1,14 +1,13 @@
 package sport.store.thinh.service;
 
 import com.github.slugify.Slugify;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import sport.store.thinh.domain.Product;
-import sport.store.thinh.domain.ProductImage;
-import sport.store.thinh.domain.ProductVariant;
+import sport.store.thinh.domain.*;
 import sport.store.thinh.domain.dto.request.ReqProductDTO;
 import sport.store.thinh.domain.dto.response.ResBrandDTO;
 import sport.store.thinh.domain.dto.response.ResProductDTO;
@@ -38,8 +37,9 @@ public class ProductService {
     }
 
     @Transactional
-    public ResProductDTO createProduct(ReqProductDTO reqProductDTO){
+    public ResProductDTO createProduct(ReqProductDTO reqProductDTO) {
         Product savedProduct = productRepository.save(convertFromReqDTO(reqProductDTO));
+
         if (reqProductDTO.getVariants() != null && !reqProductDTO.getVariants().isEmpty()) {
             List<ProductVariant> variants = reqProductDTO.getVariants()
                     .stream().map(variant -> convertToVariant(variant, savedProduct)).toList();
@@ -57,14 +57,51 @@ public class ProductService {
         return convertToResDTO(savedProduct);
     }
 
-    public ResultPaginationDTO<ResProductDTO> getAllProducts(Specification<Product> spec, Pageable pageable){
-        Page<Product> productPage;
-        if(spec != null)
-        {
-            productPage = productRepository.findAll(spec, pageable);
+    public boolean existsById(Long id) {
+        return productRepository.existsById(id);
+    }
+
+    @Transactional
+    public ResProductDTO editProduct(ReqProductDTO reqProductDTO) {
+        //Tìm product
+        Product productNeedToEdit = productRepository.findById(reqProductDTO.getProductId())
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sản phẩm với ID: " + reqProductDTO.getProductId()));
+        //Cập nhật product
+        productNeedToEdit.setName(reqProductDTO.getProductName());
+        Brand brandProxy = brandRepository.getReferenceById(reqProductDTO.getBrandId());
+        productNeedToEdit.setBrand(brandProxy);
+
+        Category categoryProxy = categoryRepository.getReferenceById(reqProductDTO.getCategoryId());
+        productNeedToEdit.setCategory(categoryProxy);
+        productNeedToEdit.setDescription(reqProductDTO.getDescription());
+        productNeedToEdit.setSku(reqProductDTO.getSku());
+        productNeedToEdit.setBasePrice(reqProductDTO.getBasePrice());
+        productNeedToEdit.setStockQuantity(reqProductDTO.getStockQuantity());
+        productNeedToEdit.setStatus(reqProductDTO.getStatus());
+
+        if (reqProductDTO.getVariants() != null && !reqProductDTO.getVariants().isEmpty()) {
+            List<ProductVariant> variants = reqProductDTO.getVariants()
+                    .stream().map(variant -> convertToVariant(variant, productNeedToEdit)).toList();
+            productVariantRepository.saveAll(variants);
+            productNeedToEdit.setVariants(variants);
         }
-        else
-        {
+
+        if (reqProductDTO.getImages() != null && !reqProductDTO.getImages().isEmpty()) {
+            List<ProductImage> images = reqProductDTO.getImages()
+                    .stream().map(image -> convertToImage(image, productNeedToEdit)).toList();
+            productImageRepository.saveAll(images);
+            productNeedToEdit.setImages(images);
+        }
+
+
+        return convertToResDTO(productNeedToEdit);
+    }
+
+    public ResultPaginationDTO<ResProductDTO> getAllProducts(Specification<Product> spec, Pageable pageable) {
+        Page<Product> productPage;
+        if (spec != null) {
+            productPage = productRepository.findAll(spec, pageable);
+        } else {
             productPage = productRepository.findAll(pageable);
         }
         List<ResProductDTO> productDTOList = productPage.getContent().stream().map(this::convertToResDTO).toList();
@@ -90,17 +127,17 @@ public class ProductService {
         resProductDTO.setSku(product.getSku());
         resProductDTO.setSlug(product.getSlug());
         resProductDTO.setDescription(product.getDescription());
-        if(product.getImages() != null) {
+        if (product.getImages() != null) {
             resProductDTO.setImages(product.getImages().stream().map(image -> convertFromImageResDTO(image)).toList());
         }
-        if(product.getVariants() != null) {
-        resProductDTO.setVariants(product.getVariants().stream().map(variant -> convertFromVariantResDTO(variant)).toList());
+        if (product.getVariants() != null) {
+            resProductDTO.setVariants(product.getVariants().stream().map(variant -> convertFromVariantResDTO(variant)).toList());
         }
         return resProductDTO;
 
     }
 
-    public Product convertFromReqDTO(ReqProductDTO reqProductDTO){
+    public Product convertFromReqDTO(ReqProductDTO reqProductDTO) {
         Product product = new Product();
         Slugify slg = Slugify.builder().build();
         product.setName(reqProductDTO.getProductName());

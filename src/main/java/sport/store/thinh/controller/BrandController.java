@@ -1,13 +1,16 @@
 package sport.store.thinh.controller;
 
+import jakarta.validation.Valid;
 import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.domain.Like;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import sport.store.thinh.domain.Brand;
 import sport.store.thinh.domain.Users;
 import sport.store.thinh.domain.dto.response.ResBrandDTO;
@@ -15,6 +18,8 @@ import sport.store.thinh.domain.dto.response.ResultPaginationDTO;
 import sport.store.thinh.service.BrandService;
 import sport.store.thinh.util.annotation.APIMessage;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
@@ -26,10 +31,15 @@ public class BrandController {
         this.brandService = brandService;
     }
 
-    @PostMapping("/brands")
+    @PostMapping(value = "/brands", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @APIMessage("Create new brand")
-    public ResponseEntity<ResBrandDTO> handleCreateBrand(@RequestBody Brand brand) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(brandService.createBrand(brand));
+    public ResponseEntity<ResBrandDTO> handleCreateBrand(
+            @ModelAttribute @Valid Brand brand,
+            @RequestParam(value = "file", required = false) MultipartFile file)
+    {
+        ResBrandDTO newBrand = brandService.createBrand(brand, file);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(newBrand);
     }
 
     @GetMapping("/brands")
@@ -53,8 +63,9 @@ public class BrandController {
 
     @PutMapping("/brands")
     @APIMessage("Update brand")
-    public ResponseEntity<ResBrandDTO> handleUpdateBrand(@RequestBody Brand brand) {
-        return ResponseEntity.ok().body(brandService.updateBrand(brand));
+    public ResponseEntity<ResBrandDTO> handleUpdateBrand(@ModelAttribute @Valid Brand brand,
+                                                         @RequestParam(value = "file", required = false) MultipartFile file) {
+        return ResponseEntity.ok().body(brandService.updateBrand(brand, file));
     }
 
     @DeleteMapping("/brands/{id}")

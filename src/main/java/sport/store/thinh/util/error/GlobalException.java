@@ -24,6 +24,7 @@ public class GlobalException{
     @ExceptionHandler(value = {
             BadCredentialsException.class,
             NoSuchElementException.class,
+            IllegalArgumentException.class,
             IdInvalidException.class
     })
     public ResponseEntity<RestResponse<Object>> handleGlobalException(Exception e) {

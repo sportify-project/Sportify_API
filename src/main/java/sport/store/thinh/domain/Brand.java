@@ -21,7 +21,7 @@ import java.util.List;
 public class Brand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(nullable = false, unique = true, length = 100)
     private String name;
@@ -76,5 +76,14 @@ public class Brand {
         this.updatedAt = updatedAt;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
+    }
+
+    public Brand(Long id, String name, String slug, String description, String logoUrl, String country) {
+        this.id = id;
+        this.name = name;
+        this.slug = slug;
+        this.description = description;
+        this.logoUrl = logoUrl;
+        this.country = country;
     }
 }

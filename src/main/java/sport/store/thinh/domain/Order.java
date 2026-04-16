@@ -62,11 +62,11 @@ public class Order {
 
     @PrePersist
     private void prePersist() {
-        createdBy = String.valueOf(SecurityUtil.getCurrentUserLogin());
+        createdBy = SecurityUtil.getCurrentUserLogin().get();
     }
 
     @PreUpdate
     private void preUpdate() {
-        updatedBy = String.valueOf(SecurityUtil.getCurrentUserLogin());
+        updatedBy = SecurityUtil.getCurrentUserLogin().get();
     }
 }

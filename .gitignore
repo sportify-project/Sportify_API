@@ -21,6 +21,8 @@ target/
 Dockerfile
 *.yaml
 
+data/
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

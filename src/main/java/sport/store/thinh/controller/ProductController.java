@@ -29,6 +29,12 @@ public class ProductController {
         return ResponseEntity.status(201).body(productService.createProduct(reqProductDTO));
     }
 
+    @PutMapping("/products")
+    @APIMessage("Edit a product")
+    public ResponseEntity<ResProductDTO> editProduct(@Valid @RequestBody ReqProductDTO reqProductDTO){
+        return ResponseEntity.ok(productService.editProduct(reqProductDTO));
+    }
+
     @GetMapping("/products")
     @APIMessage("Get all products")
     public ResponseEntity<ResultPaginationDTO<ResProductDTO>> getAllProducts(@Spec(path = "name", spec = Like.class) Specification<Product> spec, Pageable pageable){
