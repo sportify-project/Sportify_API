@@ -21,6 +21,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) {
         Users user = userRepository.findByEmail(username);
 
+        if (user == null) {
+            throw new UsernameNotFoundException("Không tìm thấy người dùng với email: " + username);
+        }
+
         return User
                 .withUsername(user.getEmail())
                 .password(user.getPassword())

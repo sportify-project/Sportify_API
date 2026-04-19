@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import sport.store.thinh.util.SecurityUtil;
 
 import java.time.Instant;
 import java.util.List;
@@ -25,8 +28,10 @@ public class Users {
     private int age;
     @Column(columnDefinition = "TEXT")
     private String refreshToken;
+    @CreationTimestamp
     private Instant createdAt;
     private String createdBy;
+    @UpdateTimestamp
     private Instant updatedAt;
     private String updatedBy;
     @ColumnDefault("true")
@@ -53,13 +58,13 @@ public class Users {
 
     @PrePersist
     public void prePersist() {
-        createdBy = "createdBy";
+        createdBy = SecurityUtil.getCurrentUserLogin().get();
         createdAt = Instant.now();
     }
 
     @PreUpdate
     public void preUpdate() {
-        updatedBy = "updatedBy";
+        updatedBy = SecurityUtil.getCurrentUserLogin().get();
         updatedAt = Instant.now();
     }
 }

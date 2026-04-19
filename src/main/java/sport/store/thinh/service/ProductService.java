@@ -13,8 +13,10 @@ import sport.store.thinh.domain.dto.response.ResBrandDTO;
 import sport.store.thinh.domain.dto.response.ResProductDTO;
 import sport.store.thinh.domain.dto.response.ResultPaginationDTO;
 import sport.store.thinh.repository.*;
+import org.springframework.web.multipart.MultipartFile;
 import sport.store.thinh.util.constant.ProductStatus;
 import sport.store.thinh.util.error.IdInvalidException;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,17 +29,19 @@ public class ProductService {
     private final ProductVariantRepository productVariantRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
+    private final FileUploadService fileUploadService;
 
-    public ProductService(ProductRepository productRepository, ProductImageRepository productImageRepository, ProductVariantRepository productVariantRepository, BrandRepository brandRepository, CategoryRepository categoryRepository) {
+    public ProductService(ProductRepository productRepository, ProductImageRepository productImageRepository, ProductVariantRepository productVariantRepository, BrandRepository brandRepository, CategoryRepository categoryRepository, FileUploadService fileUploadService) {
         this.productRepository = productRepository;
         this.productImageRepository = productImageRepository;
         this.productVariantRepository = productVariantRepository;
         this.brandRepository = brandRepository;
         this.categoryRepository = categoryRepository;
+        this.fileUploadService = fileUploadService;
     }
 
     @Transactional
-    public ResProductDTO createProduct(ReqProductDTO reqProductDTO) {
+    public ResProductDTO createProduct(ReqProductDTO reqProductDTO, MultipartFile file) {
         Product savedProduct = productRepository.save(convertFromReqDTO(reqProductDTO));
 
         if (reqProductDTO.getVariants() != null && !reqProductDTO.getVariants().isEmpty()) {
@@ -54,6 +58,24 @@ public class ProductService {
             savedProduct.setImages(images);
         }
 
+        if (file != null && !file.isEmpty()) {
+            try {
+                String fileName = fileUploadService.store(file, "products");
+                ProductImage image = new ProductImage();
+                image.setProduct(savedProduct);
+                image.setImageUrl(fileName);
+                image.setDisplayOrder(0);
+                image.setIsPrimary(true);
+                productImageRepository.save(image);
+                if (savedProduct.getImages() == null) {
+                    savedProduct.setImages(new ArrayList<>());
+                }
+                savedProduct.getImages().add(image);
+            } catch (IOException e) {
+                throw new RuntimeException("Lỗi upload file: " + e.getMessage());
+            }
+        }
+
         return convertToResDTO(savedProduct);
     }
 
@@ -62,7 +84,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ResProductDTO editProduct(ReqProductDTO reqProductDTO) {
+    public ResProductDTO editProduct(ReqProductDTO reqProductDTO, MultipartFile file) {
         //Tìm product
         Product productNeedToEdit = productRepository.findById(reqProductDTO.getProductId())
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sản phẩm với ID: " + reqProductDTO.getProductId()));
@@ -93,6 +115,30 @@ public class ProductService {
             productNeedToEdit.setImages(images);
         }
 
+        if (file != null && !file.isEmpty()) {
+            try {
+                String fileName = fileUploadService.store(file, "products");
+                ProductImage newImage = new ProductImage();
+                newImage.setProduct(productNeedToEdit);
+                newImage.setImageUrl(fileName);
+                newImage.setDisplayOrder(0);
+                newImage.setIsPrimary(true);
+                productImageRepository.save(newImage);
+                if (productNeedToEdit.getImages() == null) {
+                    productNeedToEdit.setImages(new ArrayList<>());
+                } else {
+                    for (ProductImage img : productNeedToEdit.getImages()) {
+                        if (img.getIsPrimary() != null && img.getIsPrimary()) {
+                            img.setIsPrimary(false);
+                            productImageRepository.save(img);
+                        }
+                    }
+                }
+                productNeedToEdit.getImages().add(newImage);
+            } catch (IOException e) {
+                throw new RuntimeException("Lỗi upload file: " + e.getMessage());
+            }
+        }
 
         return convertToResDTO(productNeedToEdit);
     }
@@ -115,6 +161,16 @@ public class ProductService {
         resultPaginationDTO.setResult(productDTOList);
         return resultPaginationDTO;
     }
+
+    public ResProductDTO getProductById(Long id) {
+        Product p =  productRepository.findById(id).orElse(null);
+        if(p == null){
+            throw new NoSuchElementException("Không tồn tại sản phẩm với id là "+ id);
+        }
+        return convertToResDTO(p);
+    }
+
+    //Converter
 
     private ResProductDTO convertToResDTO(Product product) {
         ResProductDTO resProductDTO = new ResProductDTO();
@@ -180,7 +236,12 @@ public class ProductService {
     public ResProductDTO.ImageDTO convertFromImageResDTO(ProductImage productImage) {
         ResProductDTO.ImageDTO imageDTO = new ResProductDTO.ImageDTO();
         imageDTO.setImageId(productImage.getId());
-        imageDTO.setUrl(productImage.getImageUrl());
+        // prepend storage path if it doesn't have http
+        if (productImage.getImageUrl() != null && !productImage.getImageUrl().startsWith("http")) {
+            imageDTO.setUrl("/storage/products/" + productImage.getImageUrl());
+        } else {
+            imageDTO.setUrl(productImage.getImageUrl());
+        }
         imageDTO.setDisplayOrder(productImage.getDisplayOrder());
         return imageDTO;
     }

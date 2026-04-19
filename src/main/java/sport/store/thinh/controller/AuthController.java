@@ -138,4 +138,33 @@ public class AuthController {
                 .build();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(resLoginDTO);
     }
+
+    @PostMapping("/auth/logout")
+    @APIMessage("Logout")
+    public ResponseEntity<Void> logout(
+            @CookieValue(name = "refresh-token", defaultValue = "") String refreshToken
+    ) {
+        // Xoá refresh token trong database (nếu có)
+        if (!refreshToken.isEmpty()) {
+            try {
+                Jwt decodedToken = this.securityUtil.checkValidRefreshToken(refreshToken);
+                String email = decodedToken.getSubject();
+                userService.updateUserToken(null, email);
+            } catch (Exception e) {
+                // Token đã hết hạn hoặc không hợp lệ, bỏ qua
+            }
+        }
+
+        // Xoá cookie refresh-token trên browser bằng cách set maxAge = 0
+        ResponseCookie deleteRefreshCookie = ResponseCookie.from("refresh-token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteRefreshCookie.toString())
+                .build();
+    }
 }
