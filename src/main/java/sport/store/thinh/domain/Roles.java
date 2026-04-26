@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import sport.store.thinh.util.SecurityUtil;
 
 import java.time.Instant;
 import java.util.List;
@@ -30,13 +31,13 @@ public class Roles {
     @PrePersist
     private void prePersist() {
         createdAt = Instant.now();
-        createdBy = "admin";
+        createdBy = SecurityUtil.getCurrentUserLogin().get();
     }
 
     @PreUpdate
     private void preUpdate() {
         updatedAt = Instant.now();
-        updatedBy = "admin";
+        updatedBy = SecurityUtil.getCurrentUserLogin().get();
     }
 
     public Roles() {

@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return User
                 .withUsername(user.getEmail())
                 .password(user.getPassword())
-                .authorities("USER")
+                .authorities(user.getRole() != null ? user.getRole().getRole() : "USER")
                 .build();
     }
 }

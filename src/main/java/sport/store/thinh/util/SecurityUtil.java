@@ -60,14 +60,13 @@ public class SecurityUtil {
     // ===== TOKEN CREATE =====
 
     public String createAccessToken(String email, ResLoginDTO resLoginDTO) {
-
         Instant now = Instant.now();
         Instant expiry = now.plus(accessTokenExpiration, ChronoUnit.SECONDS);
 
-        List<String> permissions = List.of(
-                "ROLE_USER_CREATE",
-                "ROLE_USER_UPDATE"
-        );
+        List<String> permissions = new ArrayList<>();
+        if (resLoginDTO.getUser() != null && resLoginDTO.getUser().getRole() != null) {
+            permissions.add(resLoginDTO.getUser().getRole());
+        }
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .subject(email)

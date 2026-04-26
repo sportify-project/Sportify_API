@@ -9,30 +9,24 @@ import org.hibernate.annotations.UpdateTimestamp;
 import sport.store.thinh.util.SecurityUtil;
 
 import java.time.Instant;
+import java.util.*;
 
 @Entity
-@Table(name = "cart_items")
+@Table(name = "carts")
 @Getter
 @Setter
 @NoArgsConstructor
-public class CartItem {
+public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cart_id", nullable = false)
-    private Cart cart;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_variant_id", nullable = false)
-    private ProductVariant productVariant;
-
-    private int quantity;
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartItem> cartItems = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

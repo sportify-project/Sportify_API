@@ -37,6 +37,8 @@ public class Users {
     @ColumnDefault("true")
     private Boolean active;
 
+    private String status;
+
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Roles role;
@@ -44,8 +46,8 @@ public class Users {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Order> orders;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<CartItem> cartItems;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Cart cart;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Review> reviews;

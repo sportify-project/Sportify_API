@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import sport.store.thinh.domain.Users;
 import sport.store.thinh.domain.dto.request.ReqLoginDTO;
+import sport.store.thinh.domain.dto.request.ReqRegisterDTO;
 import sport.store.thinh.domain.dto.response.ResLoginDTO;
 import sport.store.thinh.domain.dto.response.ResUserDTO;
 import sport.store.thinh.service.UserService;
@@ -45,14 +46,13 @@ public class AuthController {
 
     @PostMapping("/auth/register")
     @APIMessage("Register new user")
-    public ResponseEntity<ResUserDTO> register(@Valid @RequestBody Users user) throws IdInvalidException {
-        boolean isEmailExist = userService.existsByEmail(user.getEmail());
+    public ResponseEntity<ResUserDTO> register(@Valid @RequestBody ReqRegisterDTO registerDTO) throws IdInvalidException {
+        boolean isEmailExist = userService.existsByEmail(registerDTO.getEmail());
         if (isEmailExist) {
-            throw new IdInvalidException("Email " + user.getEmail() + " đã tồn tại!");
+            throw new IdInvalidException("Email " + registerDTO.getEmail() + " đã tồn tại!");
         }
-        String hashPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashPassword);
-        Users createdUser = userService.createUser(user);
+
+        Users createdUser = userService.registerUser(registerDTO);
         return ResponseEntity.status(201).body(userService.mapToUserDTO(createdUser));
     }
 
@@ -80,7 +80,8 @@ public class AuthController {
             ResLoginDTO.UserLogin u = new ResLoginDTO.UserLogin(
                     currentUser.getUserId(),
                     currentUser.getEmail(),
-                    currentUser.getName());
+                    currentUser.getName(),
+                    currentUser.getRole() != null ? currentUser.getRole().getRole() : null);
             resLoginDTO.setUser(u);
         }
         String accessToken = this.securityUtil.createAccessToken(authentication.getName(), resLoginDTO);
@@ -120,7 +121,11 @@ public class AuthController {
         ResLoginDTO resLoginDTO = new ResLoginDTO();
         Users currentUserDB = userService.handleGetUserByUserName(email);
         if (currentUserDB != null) {
-            ResLoginDTO.UserLogin u = new ResLoginDTO.UserLogin(currentUserDB.getUserId(), currentUserDB.getEmail(), currentUserDB.getName());
+            ResLoginDTO.UserLogin u = new ResLoginDTO.UserLogin(
+                    currentUserDB.getUserId(),
+                    currentUserDB.getEmail(),
+                    currentUserDB.getName(),
+                    currentUserDB.getRole() != null ? currentUserDB.getRole().getRole() : null);
             resLoginDTO.setUser(u);
         }
         String accessToken = this.securityUtil.createAccessToken(email, resLoginDTO);

@@ -101,18 +101,20 @@ public class ProductService {
         productNeedToEdit.setStockQuantity(reqProductDTO.getStockQuantity());
         productNeedToEdit.setStatus(reqProductDTO.getStatus());
 
-        if (reqProductDTO.getVariants() != null && !reqProductDTO.getVariants().isEmpty()) {
-            List<ProductVariant> variants = reqProductDTO.getVariants()
+        // Update Variants
+        if (reqProductDTO.getVariants() != null) {
+            productNeedToEdit.getVariants().clear();
+            List<ProductVariant> newVariants = reqProductDTO.getVariants()
                     .stream().map(variant -> convertToVariant(variant, productNeedToEdit)).toList();
-            productVariantRepository.saveAll(variants);
-            productNeedToEdit.setVariants(variants);
+            productNeedToEdit.getVariants().addAll(newVariants);
         }
 
-        if (reqProductDTO.getImages() != null && !reqProductDTO.getImages().isEmpty()) {
-            List<ProductImage> images = reqProductDTO.getImages()
+        // Update Images (DTO based)
+        if (reqProductDTO.getImages() != null) {
+            productNeedToEdit.getImages().clear();
+            List<ProductImage> newImages = reqProductDTO.getImages()
                     .stream().map(image -> convertToImage(image, productNeedToEdit)).toList();
-            productImageRepository.saveAll(images);
-            productNeedToEdit.setImages(images);
+            productNeedToEdit.getImages().addAll(newImages);
         }
 
         if (file != null && !file.isEmpty()) {
@@ -170,12 +172,41 @@ public class ProductService {
         return convertToResDTO(p);
     }
 
+    public ResultPaginationDTO<ResProductDTO> getProductByCategory(Long categoryId, Pageable pageable) {
+        Page<Product> productPage = productRepository.findByCategoryId(categoryId, pageable);
+        List<ResProductDTO> productDTOList = productPage.getContent().stream().map(this::convertToResDTO).toList();
+        ResultPaginationDTO<ResProductDTO> resultPaginationDTO = new ResultPaginationDTO<>();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotal(productPage.getTotalElements());
+        meta.setPages(productPage.getTotalPages());
+        resultPaginationDTO.setMeta(meta);
+        resultPaginationDTO.setResult(productDTOList);
+        return resultPaginationDTO;
+    }
+
+    public ResultPaginationDTO<ResProductDTO> getProductByBrand(Long brandId, Pageable pageable) {
+        Page<Product> productPage = productRepository.findByBrandId(brandId, pageable);
+        List<ResProductDTO> productDTOList = productPage.getContent().stream().map(this::convertToResDTO).toList();
+        ResultPaginationDTO<ResProductDTO> resultPaginationDTO = new ResultPaginationDTO<>();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotal(productPage.getTotalElements());
+        meta.setPages(productPage.getTotalPages());
+        resultPaginationDTO.setMeta(meta);
+        resultPaginationDTO.setResult(productDTOList);
+        return resultPaginationDTO;
+    }
+
     //Converter
 
     private ResProductDTO convertToResDTO(Product product) {
         ResProductDTO resProductDTO = new ResProductDTO();
         resProductDTO.setProductId(product.getId());
         resProductDTO.setProductName(product.getName());
+        resProductDTO.setBasePrice(product.getBasePrice());
         resProductDTO.setBrandId(product.getBrand().getId());
         resProductDTO.setBrandName(product.getBrand().getName());
         resProductDTO.setCategoryId(product.getCategory().getId());
@@ -216,7 +247,14 @@ public class ProductService {
     private ProductVariant convertToVariant(ReqProductDTO.VariantDTO dto, Product product) {
         ProductVariant variant = new ProductVariant();
         variant.setProduct(product);
-        variant.setSku(dto.getSku());
+        
+        String sku = dto.getSku();
+        if (sku == null || sku.trim().isEmpty()) {
+            sku = product.getSku() + "-" + dto.getColor() + "-" + dto.getSize();
+            sku = sku.replaceAll("\\s+", "").toUpperCase();
+        }
+        variant.setSku(sku);
+        
         variant.setColor(dto.getColor());
         variant.setSize(dto.getSize());
         variant.setPrice(dto.getPrice());

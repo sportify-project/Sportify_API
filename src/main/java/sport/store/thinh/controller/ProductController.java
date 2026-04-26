@@ -1,7 +1,9 @@
 package sport.store.thinh.controller;
 
 import jakarta.validation.Valid;
+import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.domain.Like;
+import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -42,14 +44,31 @@ public class ProductController {
 
     @GetMapping("/products")
     @APIMessage("Get all products")
-    public ResponseEntity<ResultPaginationDTO<ResProductDTO>> getAllProducts(@Spec(path = "name", spec = Like.class) Specification<Product> spec, Pageable pageable){
+    public ResponseEntity<ResultPaginationDTO<ResProductDTO>> getAllProducts(
+            @And({
+                    @Spec(path = "name", spec = Like.class),
+                    @Spec(path = "brand.id", params = "brandId", spec = Equal.class),
+                    @Spec(path = "category.id", params = "categoryId", spec = Equal.class)
+            }) Specification<Product> spec, Pageable pageable) {
         return ResponseEntity.ok().body(productService.getAllProducts(spec, pageable));
     }
 
     @GetMapping("/products/{id}")
     @APIMessage("Get product by id")
     public ResponseEntity<ResProductDTO> getProductById(@PathVariable Long id){
+        return ResponseEntity.ok().body(productService.getProductById(id));
+    }
 
+    @GetMapping("/products/category/{categoryId}")
+    @APIMessage("Get products by category")
+    public ResponseEntity<ResultPaginationDTO<ResProductDTO>> getProductsByCategory(@PathVariable Long categoryId, Pageable pageable){
+        return ResponseEntity.ok().body(productService.getProductByCategory(categoryId, pageable));
+    }
+
+    @GetMapping("/products/brand/{brandId}")
+    @APIMessage("Get products by brand")
+    public ResponseEntity<ResultPaginationDTO<ResProductDTO>> getProductsByBrand(@PathVariable Long brandId, Pageable pageable){
+        return ResponseEntity.ok().body(productService.getProductByBrand(brandId, pageable));
     }
 
 }

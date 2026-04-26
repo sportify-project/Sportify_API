@@ -52,7 +52,7 @@ public class CategoryService {
         Slugify slg = Slugify.builder().build();
         category.setName(dto.getName());
         category.setSlug(slg.slugify(dto.getName()));
-        category.setDisplayOrder(dto.getDisplayOrder());
+        category.setDisplayOrder(dto.getDisplayOrder() != null ? dto.getDisplayOrder() : 0);
         category.setDescription(dto.getDescription());
         if(dto.getParentId() != null){
             Category parent = categoryRepository.findById(dto.getParentId())
@@ -69,7 +69,7 @@ public class CategoryService {
         Slugify slg = Slugify.builder().build();
         category.setName(dto.getName());
         category.setSlug(slg.slugify(dto.getName()));
-        category.setDisplayOrder(dto.getDisplayOrder());
+        category.setDisplayOrder(dto.getDisplayOrder() != null ? dto.getDisplayOrder() : 0);
         category.setDescription(dto.getDescription());
         if (dto.getParentId() != null) {
             if (dto.getId().equals(dto.getParentId())) {
