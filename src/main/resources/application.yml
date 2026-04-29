@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: thinh
+  profiles:
+    active: docker
+  datasource:
+    url: jdbc:postgresql://localhost:5433/sportstore
+    username: postgres
+    password: '123'
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+thinh:
+  jwt:
+    base64-secret: lgc9aOKjB6CneazJNnvLl2p1vwkO9T291yxz1Jk68CUNFmKqWnOIKvdkQggu6iusuaVlrasWrp3Vbo/ixE8fWA==
+    access-token-validity-in-seconds: 8640000
+    refresh-token-validity-in-seconds: 8640000
+  upload-file:
+    base-uri: "D:/Projects/sportify/data/"
+  groq:
+    api-key: ${thinh.groq_api_key:}

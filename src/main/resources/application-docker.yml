@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: thinh
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sportstore
+    username: postgres
+    password: '123'
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  groq:
+    api-key: ${thinh.groq_api_key:}

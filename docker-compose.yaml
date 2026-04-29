@@ -8,6 +8,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
       POSTGRES_DB: sportstore
+    env_file:
+      - src/main/resources/.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
