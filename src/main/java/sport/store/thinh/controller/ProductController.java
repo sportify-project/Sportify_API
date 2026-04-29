@@ -10,8 +10,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sport.store.thinh.domain.Product;
+import sport.store.thinh.domain.ProductVariant;
 import sport.store.thinh.domain.dto.request.ReqProductDTO;
 import sport.store.thinh.domain.dto.response.ResProductDTO;
+import sport.store.thinh.domain.dto.response.ResProductVariantDTO;
 import sport.store.thinh.domain.dto.response.ResultPaginationDTO;
 import sport.store.thinh.service.ProductService;
 import sport.store.thinh.util.annotation.APIMessage;
@@ -69,6 +71,14 @@ public class ProductController {
     @APIMessage("Get products by brand")
     public ResponseEntity<ResultPaginationDTO<ResProductDTO>> getProductsByBrand(@PathVariable Long brandId, Pageable pageable){
         return ResponseEntity.ok().body(productService.getProductByBrand(brandId, pageable));
+    }
+
+    @GetMapping("/variants")
+    @APIMessage("Get all variants with filtering")
+    public ResponseEntity<ResultPaginationDTO<ResProductVariantDTO>> getAllVariants(
+            @Spec(path = "product.name", params = "name", spec = Like.class) Specification<ProductVariant> spec,
+            Pageable pageable) {
+        return ResponseEntity.ok(productService.getAllVariants(spec, pageable));
     }
 
 }

@@ -11,6 +11,7 @@ import sport.store.thinh.domain.*;
 import sport.store.thinh.domain.dto.request.ReqProductDTO;
 import sport.store.thinh.domain.dto.response.ResBrandDTO;
 import sport.store.thinh.domain.dto.response.ResProductDTO;
+import sport.store.thinh.domain.dto.response.ResProductVariantDTO;
 import sport.store.thinh.domain.dto.response.ResultPaginationDTO;
 import sport.store.thinh.repository.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -198,6 +199,43 @@ public class ProductService {
         resultPaginationDTO.setMeta(meta);
         resultPaginationDTO.setResult(productDTOList);
         return resultPaginationDTO;
+    }
+
+    public ResultPaginationDTO<ResProductVariantDTO> getAllVariants(Specification<ProductVariant> spec, Pageable pageable) {
+        Page<ProductVariant> variantPage = (spec != null)
+                ? productVariantRepository.findAll(spec, pageable)
+                : productVariantRepository.findAll(pageable);
+        
+        List<ResProductVariantDTO> variantDTOList = variantPage.getContent().stream()
+                .map(this::convertToResProductVariantDTO).toList();
+
+        ResultPaginationDTO<ResProductVariantDTO> resultPaginationDTO = new ResultPaginationDTO<>();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotal(variantPage.getTotalElements());
+        meta.setPages(variantPage.getTotalPages());
+        resultPaginationDTO.setMeta(meta);
+        resultPaginationDTO.setResult(variantDTOList);
+        return resultPaginationDTO;
+    }
+
+    private ResProductVariantDTO convertToResProductVariantDTO(ProductVariant variant) {
+        ResProductVariantDTO dto = new ResProductVariantDTO();
+        dto.setId(variant.getId());
+        dto.setSku(variant.getSku());
+        dto.setSize(variant.getSize());
+        dto.setColor(variant.getColor());
+        dto.setPrice(variant.getPrice());
+        dto.setStockQuantity(variant.getStockQuantity());
+
+        if (variant.getProduct() != null) {
+            ResProductVariantDTO.ProductInnerDTO pDto = new ResProductVariantDTO.ProductInnerDTO();
+            pDto.setId(variant.getProduct().getId());
+            pDto.setName(variant.getProduct().getName());
+            dto.setProduct(pDto);
+        }
+        return dto;
     }
 
     //Converter

@@ -85,7 +85,11 @@ public class SecurityConfig {
                 "/api/v1/auth/login",
                 "/api/v1/auth/register",
                 "/api/v1/auth/logout",
-                "/storage/**"
+                "/storage/**",
+                // Supplier & Goods Receipt: chỉ cho phép đọc công khai
+                // Tất cả POST/PUT/DELETE vẫn yêu cầu đăng nhập
+                "/api/v1/suppliers",
+                "/api/v1/suppliers/{id}"
         };
 
         http

@@ -7,6 +7,7 @@ import sport.store.thinh.util.SecurityUtil;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "product_variants")
@@ -20,6 +21,9 @@ public class ProductVariant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @OneToMany(mappedBy = "variant", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Discount> discounts;
 
     @Column(length = 20)
     private String size;

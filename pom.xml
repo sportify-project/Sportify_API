@@ -60,12 +60,9 @@
 			<version>3.1.1</version>
 		</dependency>
 
-		<!-- Source: https://mvnrepository.com/artifact/tools.jackson.core/jackson-databind -->
 		<dependency>
-			<groupId>tools.jackson.core</groupId>
+			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>3.0.4</version>
-			<scope>compile</scope>
 		</dependency>
 
 		<!-- Source: https://mvnrepository.com/artifact/com.turkraft/spring-filter -->
@@ -153,6 +150,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+		<!-- PDF Processing -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.1</version>
 		</dependency>
 	</dependencies>
 

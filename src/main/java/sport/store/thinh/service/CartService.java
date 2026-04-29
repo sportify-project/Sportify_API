@@ -54,7 +54,7 @@ public class CartService {
                     .productVariantId(variant.getId())
                     .productId(variant.getProduct().getId())
                     .productName(variant.getProduct().getName())
-                    .productImage(variant.getProduct().getImages().isEmpty() ? "" : variant.getProduct().getImages().get(0).getImageUrl())
+                    .productImage(buildImageUrl(variant.getProduct().getImages().isEmpty() ? null : variant.getProduct().getImages().get(0).getImageUrl()))
                     .size(variant.getSize())
                     .color(variant.getColor())
                     .price(variant.getPrice())
@@ -128,5 +128,11 @@ public class CartService {
                 .orElseThrow(() -> new RuntimeException("Cart item not found"));
         item.setQuantity(quantity);
         cartItemRepository.save(item);
+    }
+
+    private String buildImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) return "";
+        if (imageUrl.startsWith("http")) return imageUrl;
+        return "/storage/products/" + imageUrl;
     }
 }

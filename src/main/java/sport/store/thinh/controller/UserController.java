@@ -19,7 +19,7 @@ import sport.store.thinh.util.annotation.APIMessage;
 @RestController
 @RequestMapping("/api/v1")
 public class UserController {
-    UserService userService;
+    private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
