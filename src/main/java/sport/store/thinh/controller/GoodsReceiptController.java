@@ -33,7 +33,10 @@ public class GoodsReceiptController {
     @GetMapping("/goods-receipts")
     @APIMessage("Get all goods receipts")
     public ResponseEntity<ResultPaginationDTO<ResGoodsReceiptDTO>> handleFindAll(
-            @Spec(path = "status", spec = Equal.class) Specification<GoodsReceipt> spec,
+            @net.kaczmarzyk.spring.data.jpa.web.annotation.And({
+                    @Spec(path = "status", spec = Equal.class),
+                    @Spec(path = "supplier.id", params = "supplierId", spec = Equal.class)
+            }) Specification<GoodsReceipt> spec,
             Pageable pageable) {
         return ResponseEntity.ok(goodsReceiptService.findAll(spec, pageable));
     }

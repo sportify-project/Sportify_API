@@ -12,5 +12,7 @@ public class ResCategoryDTO {
     private String name;
     private String slug;
     private Integer displayOrder;
+    private Long parentId;
+    private String parentName;
     private List<ResCategoryDTO> children;
 }

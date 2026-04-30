@@ -2,15 +2,18 @@ spring:
   application:
     name: thinh
   profiles:
-    active: docker
+    active: prod
   datasource:
-    url: jdbc:postgresql://localhost:5433/sportstore
-    username: postgres
-    password: '123'
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  docker:
+    compose:
+      enabled: false
 
 logging:
   level:

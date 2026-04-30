@@ -1,7 +1,0 @@
-spring:
-  application:
-    name: thinh
-  datasource:
-    url: jdbc:postgresql://localhost:5433/sportstore
-    username: postgres
-    password: '123'

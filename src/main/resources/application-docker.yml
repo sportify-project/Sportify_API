@@ -2,9 +2,9 @@ spring:
   application:
     name: thinh
   datasource:
-    url: jdbc:postgresql://localhost:5432/sportstore
-    username: postgres
-    password: '123'
+    url: ${DB_URL_LOCAL}
+    username: ${DB_URL_LOCAL}
+    password: ${DB_URL_LOCAL}
   jpa:
     hibernate:
       ddl-auto: update

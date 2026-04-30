@@ -27,12 +27,9 @@ public class CategoryService {
 
     public ResultPaginationDTO<ResCategoryDTO> getAllCategories(Specification<Category> spec, Pageable pageable) {
         Page<Category> categoryPage;
-        if(spec != null)
-        {
+        if (spec != null) {
             categoryPage = categoryRepository.findAll(spec, pageable);
-        }
-        else
-        {
+        } else {
             categoryPage = categoryRepository.findAll(pageable);
         }
         List<ResCategoryDTO> categoryDTOList = categoryPage.getContent().stream().map(this::convertToDTO).toList();
@@ -54,7 +51,7 @@ public class CategoryService {
         category.setSlug(slg.slugify(dto.getName()));
         category.setDisplayOrder(dto.getDisplayOrder() != null ? dto.getDisplayOrder() : 0);
         category.setDescription(dto.getDescription());
-        if(dto.getParentId() != null){
+        if (dto.getParentId() != null) {
             Category parent = categoryRepository.findById(dto.getParentId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục cha!"));
             category.setParent(parent);
@@ -92,6 +89,10 @@ public class CategoryService {
         resCategoryDTO.setName(category.getName());
         resCategoryDTO.setDisplayOrder(category.getDisplayOrder());
         resCategoryDTO.setSlug(category.getSlug());
+        if (category.getParent() != null) {
+            resCategoryDTO.setParentId(category.getParent().getId());
+            resCategoryDTO.setParentName(category.getParent().getName());
+        }
         if (category.getChildren() != null && !category.getChildren().isEmpty()) {
             List<ResCategoryDTO> childrenDTO = category.getChildren().stream()
                     .map(this::convertToDTO)
