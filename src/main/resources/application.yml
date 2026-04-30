@@ -2,7 +2,7 @@ spring:
   application:
     name: thinh
   profiles:
-    active: prod
+    active: {ENV}
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
