@@ -26,4 +26,5 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 
 # Lệnh chạy ứng dụng
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Lệnh chạy ứng dụng đã được tối ưu RAM cho gói Free 512MB
+ENTRYPOINT ["java", "-Xmx300m", "-Xss512k", "-XX:CICompilerCount=2", "-Dserver.port=${PORT:8080}", "-jar", "app.jar"]
