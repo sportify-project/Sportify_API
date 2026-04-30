@@ -103,6 +103,7 @@ public class BrandService {
             brandToUpdate.setName(brand.getName());
             brandToUpdate.setSlug(brand.getSlug());
             brandToUpdate.setDescription(brand.getDescription());
+            brandToUpdate.setLogoUrl(brand.getLogoUrl());
             brandToUpdate.setCountry(brand.getCountry());
             if(file != null && !file.isEmpty()){
                 try {
