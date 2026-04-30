@@ -138,7 +138,11 @@ public class BrandService {
         dto.setDescription(brand.getDescription());
         dto.setCountry(brand.getCountry());
         if (brand.getLogoUrl() != null && !brand.getLogoUrl().isEmpty()) {
-            dto.setImage("/storage/brands/" + brand.getLogoUrl());
+            if (brand.getLogoUrl().startsWith("http")) {
+                dto.setImage(brand.getLogoUrl());
+            } else {
+                dto.setImage("/storage/brands/" + brand.getLogoUrl());
+            }
         } else {
             dto.setImage(null);
         }
